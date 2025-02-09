@@ -14,7 +14,7 @@ items_df = items_df.groupby('order_id').agg({'order_sum': 'sum'})
 Выберем временной период, на котором мы будем проводить RFM анализ.
 Чаще всего для этого берется период длительностью один год от текущей даты,
 но могут быть выбраны и другие периоды, в зависимости от отрасли и вида бизнеса.
-Отфильтруем данные с учетом выбранного периода в 365 дней
+Отфильтруем данные с учетом выбранного периода в %d дней
 ```pyhon
 # фильтруем невыполненные заказы
 orders_df = orders_df[~orders_df.order_status.isin(
@@ -27,7 +27,7 @@ orders_df['days_delta'] = (orders_df['order_date'].max() -
 				orders_df['order_date'])\
 				.apply(lambda x: x.days)
 # фильтруем заказы возрастом более года
-orders_df = orders_df[orders_df.days_delta <= 365]
+orders_df = orders_df[orders_df.days_delta <= %d]
 ```
 Выполним join получившихся таблиц.
 ```pyhon

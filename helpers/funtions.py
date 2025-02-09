@@ -1,5 +1,7 @@
 import pandas as pd
 import streamlit as st
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 def read_template(fname: str, template_folder='data/templates/') -> str:
     fname = template_folder + fname
@@ -22,7 +24,7 @@ def load_dataset(fname: str, datasets_folder='data/datasets/') -> pd.DataFrame:
     return df
 
 @st.cache_data
-def data_preprocessing(items_df, orders_df, customers_df)->pd.DataFrame:
+def data_preprocessing(items_df, orders_df, customers_df, ndays)->pd.DataFrame:
     items_df['order_sum'] = items_df['price'] * items_df['order_item_id']
     items_df = items_df.groupby('order_id').agg({'order_sum': 'sum'})
     # фильтруем невыполненные заказы
@@ -36,7 +38,7 @@ def data_preprocessing(items_df, orders_df, customers_df)->pd.DataFrame:
                                orders_df['order_date']) \
         .apply(lambda x: x.days)
     # фильтруем заказы возрастом более года
-    orders_df = orders_df[orders_df.days_delta <= 365]
+    orders_df = orders_df[orders_df.days_delta <= ndays]
 
     df = orders_df \
         .merge(customers_df, on='customer_id', how='left') \
@@ -46,6 +48,5 @@ def data_preprocessing(items_df, orders_df, customers_df)->pd.DataFrame:
         .agg({"days_delta": ["min", "count"], "order_sum": "sum"})
     df.columns = ["customer_unique_id", "days_since_last_order", "orders_count", "order_sum"]
     return df
-
 
 

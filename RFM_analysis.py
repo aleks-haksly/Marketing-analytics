@@ -1,4 +1,6 @@
 import streamlit as st
+from matplotlib.pyplot import xlabel
+
 from helpers.funtions import (read_template, load_dataset, data_preprocessing)
 import altair as alt
 import pandas as pd
@@ -57,68 +59,62 @@ with col3:
     st.table(items_df.isna().sum().rename('NaN'), )
 # --- Section 2---
 st.subheader("2 Предобработка и объединение исходных таблиц")
+ndays = st.number_input("Выберите временой период в днях для анализа", min_value=30, max_value=None, value=365, step=1)
 with st.expander("Предобработка, фильтрация и объединение таблиц"):
-    st.markdown(read_template("data_preproc.md"))
-df=data_preprocessing(items_df, orders_df, customers_df)
+    st.markdown(read_template("data_preproc.md") % (ndays, ndays))
+df=data_preprocessing(items_df, orders_df, customers_df, ndays)
 st.subheader("Посмотрим на полученный датафрейм")
 st.dataframe(df, height=210)
 
 with st.expander("Стратегия разбивки на RFM группы"):
     st.markdown(read_template("rfm_strategy.md"))
 
-# Define two sliders for binding_rangeuser input
-lower_slider = alt.binding_range(min=0, max=360, step=1, name='Lower Bound: ', debounce=1000)
-upper_slider = alt.binding_range(min=0., max=360, step=1, name='Upper Bound: ', debounce=1000)
+import plotly.graph_objects as go
 
-lower_selector = alt.param(name='LowerSelector', value=100, bind=lower_slider)
-upper_selector = alt.param(name='UpperSelector', value=250, bind=upper_slider)
+# Создаём слайдер для выбора диапазона
+range_min, range_max = st.slider("Выберете границы сегментации клиентов по дате с последней покупки", 1, ndays, (int(ndays*0.1), int(ndays*0.9)))
 
-color = {'condition': [{'test': (alt.datum.days_since_last_order < lower_selector), 'value': 'green'},
-{'test': (alt.datum.days_since_last_order > upper_selector), 'value': 'red'}], 'value': 'lightgray'}
+df["groups"] = pd.cut(df["days_since_last_order"], [0, range_min, range_max, df["days_since_last_order"].max()], right=True, retbins=False, labels=["недавние клиенты", "нерегулярные", "потерянные клиенты"])
+df_grouped = df.groupby("groups")["days_since_last_order"].size().reset_index(name="count")
 
-# Create base chart with parameter binding
-base = alt.Chart(df).add_params(lower_selector, upper_selector)
+st.dataframe(df_grouped.set_index("groups").T, hide_index=True)
 
-# Define color ranges
-green = base.transform_filter(
-    alt.datum.days_since_last_order < lower_selector).mark_bar(color='green').encode(
-    x=alt.X('days_since_last_order:Q', bin=alt.Bin(maxbins=50), title="Days Since Last Order"),
-    y=alt.Y('count()', title="Count"),
+bins = np.histogram_bin_edges(df["days_since_last_order"], bins=4 * int((df["days_since_last_order"].max()) ** (1.0 / 3)))
 
+# Вычисляем гистограмму
+hist_values, bin_edges = np.histogram(df["days_since_last_order"], bins=bins)
+
+# Определяем цвета бинов
+colors = [
+    "green" if left_edge < range_min else "red" if left_edge >= range_max else "gray"
+    for left_edge in bin_edges[:-1]
+]
+
+# Создаём фигуру в Plotly
+fig = go.Figure()
+
+# Добавляем столбцы гистограммы с кастомными hover
+for i in range(len(hist_values)):
+    fig.add_trace(
+        go.Bar(
+            x=[(bin_edges[i] + bin_edges[i + 1]) / 2],  # Центр бин-а
+            y=[hist_values[i]],
+            marker_color=colors[i],
+            width=(bin_edges[i + 1] - bin_edges[i]) * 0.9,  # Ширина столбца
+            name=f"{bin_edges[i]:.0f} - {bin_edges[i+1]:.0f} дней",
+            hoverinfo="text",
+            hovertext=f"Дней: {bin_edges[i]:.0f} - {bin_edges[i+1]:.0f}<br>Число клиентов: {hist_values[i]}"
+        )
+    )
+
+# Настраиваем макет
+fig.update_layout(
+    title="Распределение клиентов по числу дней с последней покупки",
+    xaxis_title="Дней с последней покупки",
+    yaxis_title="Число клиентов",
+    showlegend=False,
 )
 
-gray = base.transform_filter(
-    (alt.datum.days_since_last_order >= lower_selector) &
-    (alt.datum.days_since_last_order <= upper_selector)
-).mark_bar(color="gray").encode(
-    x=alt.X('days_since_last_order:Q', bin=alt.Bin(maxbins=50)),
-    y=alt.Y('count()')
-)
-
-red = base.transform_filter(
-    alt.datum.days_since_last_order > upper_selector
-).mark_bar(color="red").encode(
-    x=alt.X('days_since_last_order:Q', bin=alt.Bin(maxbins=50)),
-    y=alt.Y('count()')
-)
-
-color = {'condition': [{'test': (alt.datum.days_since_last_order < lower_selector), 'value': 'green'},
-{'test': (alt.datum.days_since_last_order > upper_selector), 'value': 'red'}], 'value': 'lightgray'}
-
-facet_scatter = alt.Chart(df).mark_rect().encode(
-    alt.X('orders_count:Q'),
-    alt.Y('order_sum:Q').bin(maxbins=200),
-    color=color,
-)
-
-
-# Combine charts
-chart = (green + gray +red) | facet_scatter
-
-# Display in Streamlit
-st.altair_chart(chart, use_container_width=True)
-
-values = st.slider(
-'Select a range of values',
-0.0, 100.0, (25.0, 75.0))
-st.write('Values:', values)
+# Отображаем график в Streamlit
+st.plotly_chart(fig)
+https://seaborn.pydata.org/examples/joint_histogram.html
