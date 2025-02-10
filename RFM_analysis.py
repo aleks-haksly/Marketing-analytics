@@ -1,7 +1,8 @@
 import streamlit as st
-from matplotlib.pyplot import xlabel
+import matplotlib.pyplot as plt
+import seaborn as sns
 
-from helpers.funtions import (read_template, load_dataset, data_preprocessing)
+from helpers.funtions import (read_template, load_dataset, data_preprocessing, plt_joint)
 import altair as alt
 import pandas as pd
 import numpy as np
@@ -72,11 +73,10 @@ with st.expander("Стратегия разбивки на RFM группы"):
 import plotly.graph_objects as go
 
 # Создаём слайдер для выбора диапазона
-range_min, range_max = st.slider("Выберете границы сегментации клиентов по дате с последней покупки", 1, ndays, (int(ndays*0.1), int(ndays*0.9)))
+range_min, range_max = st.slider("Выберете границы сегментации клиентов по дате последней покупки", 0, ndays, (int(ndays*0.1), int(ndays*0.9)))
 
-df["groups"] = pd.cut(df["days_since_last_order"], [0, range_min, range_max, df["days_since_last_order"].max()], right=True, retbins=False, labels=["недавние клиенты", "нерегулярные", "потерянные клиенты"])
-df_grouped = df.groupby("groups")["days_since_last_order"].size().reset_index(name="count")
-
+df["groups"] = pd.cut(df["days_since_last_order"], [-1, range_min, range_max, df["days_since_last_order"].max()+1], right=True,   retbins=False, labels=["недавние клиенты", "нерегулярные клиенты", "потерянные клиенты"])
+df_grouped = df.groupby("groups", observed=True)["days_since_last_order"].agg(["count", lambda x: f"{len(x)/df.shape[0]:.1%}"]).reset_index()
 st.dataframe(df_grouped.set_index("groups").T, hide_index=True)
 
 bins = np.histogram_bin_edges(df["days_since_last_order"], bins=4 * int((df["days_since_last_order"].max()) ** (1.0 / 3)))
@@ -114,7 +114,11 @@ fig.update_layout(
     yaxis_title="Число клиентов",
     showlegend=False,
 )
-
+figs = plt_joint(df,
+                 x='orders_count',
+                 y='order_sum',
+                 groups=["недавние клиенты", "нерегулярные клиенты", "потерянные клиенты"])
 # Отображаем график в Streamlit
-st.plotly_chart(fig)
-https://seaborn.pydata.org/examples/joint_histogram.html
+
+for fig in figs:
+    st.pyplot(fig)

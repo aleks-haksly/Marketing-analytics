@@ -50,3 +50,20 @@ def data_preprocessing(items_df, orders_df, customers_df, ndays)->pd.DataFrame:
     return df
 
 
+def plt_joint(df: pd.DataFrame, x, y, groups, c=['green', 'gray', 'red']):
+    plots = []
+    for n, gr in enumerate(groups):
+        print(n ,gr)
+        print(df[df["groups"] == gr].shape)
+        g = sns.JointGrid(data=df[df["groups"] == gr], x=x, y=y, marginal_ticks=True)
+        g.fig.suptitle(groups[n])
+        g.ax_joint.set(yscale="log")
+        cax = g.figure.add_axes([.15, .55, .02, .2])
+        g.plot_joint(
+            sns.histplot, discrete=(True, False),
+            cmap=f"light:{c[n]}", pmax=.8, cbar=True, cbar_ax=cax)
+        g.plot_marginals(sns.histplot, element="step", color=c[n])
+        plots.append(g.fig)
+        return plots
+
+
