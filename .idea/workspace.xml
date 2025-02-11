@@ -5,8 +5,23 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="038725ac-796c-4de4-81f8-f3857abb8ec0" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/app.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/helpers/ABC_functions.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/helpers/RFM_functions.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/pages/ABC_XYZ_analysis.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static/laptop.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static/smartphone.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/RFM_analysis.py" beforeDir="false" afterPath="$PROJECT_DIR$/pages/RFM_analysis.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/templates/about_rfm.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/templates/conclusion.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/templates/data_description.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/templates/data_preproc.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/templates/intro.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/templates/rfm_strategy.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/templates/segments.json" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/helpers/funtions.py" beforeDir="false" afterPath="$PROJECT_DIR$/helpers/funtions.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/static/1739232745617.json" beforeDir="false" afterPath="$PROJECT_DIR$/static/funnel.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -43,6 +58,11 @@
     &quot;settings.editor.selected.configurable&quot;: &quot;com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable&quot;
   }
 }</component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\wonde\OneDrive\Документы\repos\Marketing-analytics\pages" />
+    </key>
+  </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
