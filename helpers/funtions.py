@@ -5,7 +5,7 @@ import seaborn as sns
 import numpy as np
 import plotly.graph_objects as go
 import json
-
+from st_aggrid import GridOptionsBuilder, AgGrid, DataReturnMode
 
 def read_template(fname: str, template_folder='data/templates/') -> str:
     fname = template_folder + fname
@@ -177,6 +177,19 @@ def get_segmented_df(df: pd.DataFrame, segments: dict, r_col, f_col, m_col) -> p
                           labels=segments.get(key))
     return df
 
+def get_grid(df):
+    gb = GridOptionsBuilder.from_dataframe(df)
+    gb.configure_pagination(paginationAutoPageSize=True)
+    gridOptions = gb.build()
+    grid_response = AgGrid(
+        df,
+        gridOptions=gridOptions,
+        width="100%",
+        fit_columns_on_grid_load=True,
+        data_return_mode=DataReturnMode.__members__["FILTERED_AND_SORTED"]
+    )
+    return grid_response
+
 @st.fragment
 def print_results(df, segments):
     def change(df, segments):
@@ -191,8 +204,10 @@ def print_results(df, segments):
     st.table(pd.pivot_table(data=data[["R", "F", "M"]], index=["R", "F"], columns="M",
                             aggfunc=lambda x: f"{len(x)} \n\r {len(x) / len(df.customer_unique_id):.2%}",
                             fill_value="0 \n\r0.00%"))
-
-    st.dataframe(df, hide_index=True)
+    st.markdown("#### Результаты сегментации клиентов")
+    st.write("Таблица поддерживает сортировку и фильтрацию. Для просмотра доступных опций, кликните на заголовок столбца.")
+    download_data = get_grid(df)
+    st.download_button("Download table data", data=download_data.get("data").to_csv().encode("utf-8"), mime="text/csv")
     return st.session_state.get('df', df)
 
 def load_lottiefile(fname, pth ='./static/'):
@@ -203,3 +218,5 @@ def load_lottiefile(fname, pth ='./static/'):
         except Exception as e:
             print(e)
             return None
+
+
