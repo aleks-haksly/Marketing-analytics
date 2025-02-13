@@ -4,7 +4,7 @@ import seaborn as sns
 import numpy as np
 import plotly.graph_objects as go
 import json
-from st_aggrid import GridOptionsBuilder, AgGrid, DataReturnMode
+from helpers.funtions import get_grid
 
 @st.cache_data
 def data_preprocessing(items_df, orders_df, customers_df, ndays) -> pd.DataFrame:
@@ -136,16 +136,6 @@ def make_segmentation(df: pd.DataFrame, cut_col: str, x: str, y: str, segments: 
     st.session_state[key] = (range_min, range_max)
 
 
-def get_segments(fname: str, template_folder='data/templates/RFM/'):
-    fname = template_folder + fname
-    try:
-        with open(fname, 'r') as f:
-            j = json.load(f)
-            return j
-    except Exception as e:
-        print(e)
-
-
 def get_segmented_df(df: pd.DataFrame, segments: dict, r_col, f_col, m_col) -> pd.DataFrame:
     """
         Применяет сегментацию к данным по заданным параметрам RFM.
@@ -163,24 +153,6 @@ def get_segmented_df(df: pd.DataFrame, segments: dict, r_col, f_col, m_col) -> p
     return df
 
 
-def get_grid(df: pd.DataFrame):
-    """
-    Создаёт интерактивную таблицу с возможностью сортировки и фильтрации.
-    """
-    gb = GridOptionsBuilder.from_dataframe(df)
-    gb.configure_pagination(paginationAutoPageSize=True)
-    gridOptions = gb.build()
-
-    grid_response = AgGrid(
-        df,
-        gridOptions=gridOptions,
-        width="100%",
-        fit_columns_on_grid_load=True,
-        data_return_mode=DataReturnMode.FILTERED_AND_SORTED
-    )
-
-    return grid_response
-
 
 @st.fragment
 def print_results(df: pd.DataFrame, segments: dict):
@@ -191,7 +163,7 @@ def print_results(df: pd.DataFrame, segments: dict):
     def change(df, segments):
         st.session_state["df"] = get_segmented_df(df, segments, 'days_since_last_order', 'orders_count', 'order_sum')
 
-    st.button("Применить настройки сегментации", on_click=change)
+    st.button("Применить настройки сегментации", on_click=change, args=(df, segments))
     st.subheader("Результаты сегментации клиентов")
     st.markdown("Сводная таблица с количеством клиентов в каждой категории")
     df = get_segmented_df(df, segments, 'days_since_last_order', 'orders_count', 'order_sum')
@@ -204,8 +176,8 @@ def print_results(df: pd.DataFrame, segments: dict):
         data=data[["R", "F", "M"]],
         index=["R", "F"],
         columns="M",
-        aggfunc=lambda x: f"{len(x)} \n {len(x) / len(df.customer_unique_id):.2%}",
-        fill_value="0 \n 0.00%"
+        aggfunc=lambda x: f"{len(x)} \n\r {len(x) / len(df.customer_unique_id):.2%}",
+        fill_value="0 \n\r 0.00%"
     )
     st.table(pivot_table)
 

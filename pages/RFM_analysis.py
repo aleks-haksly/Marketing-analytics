@@ -1,7 +1,7 @@
 import streamlit as st
 from streamlit_lottie import st_lottie
-from helpers.funtions import (read_template, load_dataset, load_lottiefile)
-from helpers.RFM_functions import (data_preprocessing, make_segmentation, get_segments, print_results)
+from helpers.funtions import (read_template, load_dataset, load_lottiefile, get_settings)
+from helpers.RFM_functions import (data_preprocessing, make_segmentation, print_results)
 
 col1, col2 = st.columns([2, 5])
 with col1:
@@ -13,7 +13,7 @@ with col2:
 customers_df = load_dataset("olist_customers_dataset.csv")
 orders_df = load_dataset("olist_orders_dataset.csv")
 items_df = load_dataset("olist_order_items_dataset.csv")
-segments = get_segments("segments.json")
+segments = get_settings("RFM/segments.json")
 
 with st.expander("Справка о RFM анализе"):
     st.markdown(read_template("RFM/about_rfm.md"))

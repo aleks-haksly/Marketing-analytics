@@ -1,0 +1,1 @@
+{"columnDefs": [{"headerName": "Наименование товарной позиции", "field": "dr_ndrugs", "tooltipField": "country", "flex": 2}, {"headerName": "По числу проданных позиций", "field": "group_amount", "flex": 1}, {"headerName": "По прибыли с позиции", "field": "group_profit", "flex": 1}, {"headerName": "По выручке с позиции", "field": "group_revenue", "flex": 1}]}
