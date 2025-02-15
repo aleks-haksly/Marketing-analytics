@@ -1,8 +1,8 @@
 import streamlit as st
 import pandas as pd
 
-from helpers.funtions import (read_template, load_lottiefile, read_sql, get_grid, get_settings)
-from helpers.ABC_functions import select, print_abc_results
+from helpers.funtions import (read_template, load_lottiefile)
+from helpers.ABC_functions import select, print_abc_results, print_xyz_results
 from streamlit_lottie import st_lottie
 
 st.set_page_config(layout="wide")
@@ -27,3 +27,13 @@ with st.expander("SQL код, группирующий товары по уни�
     st.markdown(read_template("ABC/005 abc_sql.md"))
 st.markdown(read_template("ABC/006 abc_variation.md"))
 print_abc_results()
+st.markdown("#### Выводы по многомерному ABC-анализу продаж товаров аптечной сети")
+with st.expander("Выводы и рекомендации"):
+    st.markdown(read_template("ABC/007 abc_summary.md"))
+
+st.subheader("2. XYZ анализ")
+with st.expander("Справка о XYZ анализе"):
+    st.markdown(read_template("ABC/008 about_xyz.md"))
+with st.expander("SQL код для анализа вариативности спроса"):
+    st.markdown(read_template("ABC/009 xyz_sql.md"))
+print_xyz_results()

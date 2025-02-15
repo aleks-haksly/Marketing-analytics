@@ -67,7 +67,7 @@ def make_segmentation(df: pd.DataFrame, cut_col: str, x: str, y: str, segments: 
     if df[cut_col].dtype == int:
         range_min, range_max = st.slider(f"Выберете границы сегментации клиентов по параметру: '{text.lower()}'",
                                          0, df[cut_col].max() + 1,
-                                         (int(df[cut_col].max() * 0.1),
+                                         (int(df[cut_col].max() * 0.2),
                                           int(df[cut_col].max() * 0.9)))
     else:
         range_min, range_max = st.slider(f"Выберете границы сегментации клиентов по параметру: '{text.lower()}'",

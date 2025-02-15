@@ -29,7 +29,6 @@ def print_abc_results():
     def change():
         option = dict(zip(['A', 'B', 'C'], map(int, st.session_state["selected_option"].split("-"))))
         st.session_state["data"] = select(read_sql("ABC/abc.sql").format(**option))
-        #st.dataframe(select(read_sql("ABC/abc.sql").format(**option)))
 
 
     if "data" not in st.session_state:
@@ -38,7 +37,7 @@ def print_abc_results():
 
     col1, col2 = st.columns([1, 1])
     with col1:
-        st.markdown("#### Результат классификации товаров")
+        st.markdown("#### Результат классификации товаров:")
     with col2:
         st.selectbox(
             "H",
@@ -55,8 +54,43 @@ def print_abc_results():
         index=["По прибыли с позиции", "По выручке с позиции"],
         aggfunc=lambda x: len(x),
         fill_value=0,
-        observed=False
+        observed=False, margins=True, margins_name='Всего'
     ).rename(columns={"A": "По числу проданных позиций: A",
                       "B": "По числу проданных позиций: B",
                       "C": "По числу проданных позиций: C"}).reset_index(), )
-#rename(index={"0":1}
+
+
+@st.fragment
+def print_xyz_results():
+    """Выводит результаты классификации товаров"""
+    params = {
+        "columnDefs": [
+            {"field": "Наименование"},
+            {
+                "field": "Вариативность",
+                "valueFormatter": "x = (value * 100).toFixed(1) + '%'; return x;"
+            }
+        ]
+    }
+    def change():
+        if st.session_state["selected_option_xyz"] == "day":
+            st.session_state["xyz_data"] = select(read_sql("ABC/xyz.sql"))
+        else:
+            st.session_state["xyz_data"] = select(read_sql("ABC/xyz_week.sql"))
+
+    if "xyz_data" not in st.session_state:
+        st.session_state["xyz_data"] = select(read_sql("ABC/xyz.sql"))
+
+    col1, col2 = st.columns([1, 1])
+    with col1:
+        st.markdown("#### Результат классификации товаров:")
+    with col2:
+        st.selectbox(
+            "H",
+            ("day", "week"),
+            label_visibility="collapsed",
+            on_change=change, key="selected_option_xyz")
+
+    # Берем данные из session_state
+    xyz_grid = get_grid(st.session_state["xyz_data"],  **params, height=200)
+
