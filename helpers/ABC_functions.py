@@ -1,9 +1,9 @@
 import streamlit as st
 import pandas as pd
-from click import option
+
 from sqlalchemy import create_engine, text
 from helpers.funtions import get_grid, read_sql
-from st_aggrid import GridOptionsBuilder, AgGrid, DataReturnMode
+
 
 @st.cache_data
 def select(sql: str) -> pd.DataFrame:
@@ -47,8 +47,7 @@ def print_abc_results():
             on_change=change, key="selected_option")
 
     # Берем данные из session_state
-    abc_grid = get_grid(st.session_state["data"])
-
+    abc_grid = get_grid(st.session_state["data"], height=200)
     st.markdown("#### Сводная таблица для оценки количества товаров в каждой группе")
     st.table(pd.pivot_table(
         data=abc_grid.data[["По числу проданных позиций", "По прибыли с позиции", "По выручке с позиции"]],
@@ -56,7 +55,8 @@ def print_abc_results():
         index=["По прибыли с позиции", "По выручке с позиции"],
         aggfunc=lambda x: len(x),
         fill_value=0,
-        observed=True
+        observed=False
     ).rename(columns={"A": "По числу проданных позиций: A",
                       "B": "По числу проданных позиций: B",
-                      "C": "По числу проданных позиций: C"}))
+                      "C": "По числу проданных позиций: C"}).reset_index(), )
+#rename(index={"0":1}

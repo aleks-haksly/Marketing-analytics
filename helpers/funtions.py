@@ -49,7 +49,7 @@ def read_sql(fname: str, params=None, sql_folder='data/SQL/') -> str:
     return sql_text
 
 
-def get_grid(df: pd.DataFrame, params=None):
+def get_grid(df: pd.DataFrame, **params):
     """
     Создаёт интерактивную таблицу с возможностью сортировки и фильтрации.
     """
