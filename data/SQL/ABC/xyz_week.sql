@@ -3,24 +3,24 @@ WITH grouped_products AS (
         dr_ndrugs,
         DATE_TRUNC('week', dr_dat)::date AS dr_dat,
         SUM(dr_kol) AS amount
-    FROM sales
-    GROUP BY dr_ndrugs, DATE_TRUNC('week', dr_dat)  -- ✅ Исправил группировку
+    FROM apteka.sales
+    GROUP BY dr_ndrugs, DATE_TRUNC('week', dr_dat) 
 ),
 all_dates AS (
     SELECT generate_series(
-        (SELECT MIN(DATE_TRUNC('week', dr_dat)::date) FROM sales),  -- ✅ Привел к `date`
-        (SELECT MAX(DATE_TRUNC('week', dr_dat)::date) FROM sales),
+        (SELECT MIN(DATE_TRUNC('week', dr_dat)::date) FROM apteka.sales), 
+        (SELECT MAX(DATE_TRUNC('week', dr_dat)::date) FROM apteka.sales),
         '7 days'::interval
     ) AS dates
 ),
 all_products AS (
-    SELECT DISTINCT dr_ndrugs AS products FROM sales
+    SELECT DISTINCT dr_ndrugs AS products FROM apteka.sales
 ),
 analytical_table AS (
     SELECT 
         d.dates, 
         p.products, 
-        COALESCE(gp.amount, 0) AS amount  -- ✅ Оставил `COALESCE`
+        COALESCE(gp.amount, 0) AS amount 
     FROM all_dates d
     CROSS JOIN all_products p
     LEFT JOIN grouped_products gp 

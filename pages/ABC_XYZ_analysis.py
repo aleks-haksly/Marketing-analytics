@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+from helpers.funtions import  get_grid
 
 from helpers.funtions import (read_template, load_lottiefile)
 from helpers.ABC_functions import select, print_abc_results, print_xyz_results
@@ -26,7 +27,7 @@ with st.expander("Подключение в PostgreSQL"):
 with st.expander("SQL код, группирующий товары по уникальному наименованию товарной позиции и выполняющий агрегации"):
     st.markdown(read_template("ABC/005 abc_sql.md"))
 st.markdown(read_template("ABC/006 abc_variation.md"))
-print_abc_results()
+abc = print_abc_results()
 st.markdown("#### Выводы по многомерному ABC-анализу продаж товаров аптечной сети")
 with st.expander("Выводы и рекомендации"):
     st.markdown(read_template("ABC/007 abc_summary.md"))
@@ -36,4 +37,19 @@ with st.expander("Справка о XYZ анализе"):
     st.markdown(read_template("ABC/008 about_xyz.md"))
 with st.expander("SQL код для анализа вариативности спроса"):
     st.markdown(read_template("ABC/009 xyz_sql.md"))
-print_xyz_results()
+xyz = print_xyz_results()
+
+get_grid(pd.merge(abc.data, xyz.data, how='inner', on = "Наименование товарной позиции"), **{
+        "columnDefs": [
+            {"field": "Наименование товарной позиции"},
+            {"field": "По числу проданных позиций"},
+            {"field": "По прибыли с позиции"},
+            {"field": "По выручке с позиции"},
+            {
+                "field": "Вариативность",
+                "valueFormatter": "x = (value * 100).toFixed(1) + '%'; return x;"
+            }
+        ]
+    })
+
+
