@@ -67,7 +67,7 @@ def get_grid(df: pd.DataFrame, **params):
     )
     return grid_response
 
-def get_settings(fname: str, template_folder='data/templates/', encoding='utf-8'):
+def get_settings(fname: str, template_folder='data/templates/', encoding='cp1251'):
     fname = template_folder + fname
     try:
         with open(fname, 'r', encoding=encoding) as f:
