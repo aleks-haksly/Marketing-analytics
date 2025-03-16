@@ -13,7 +13,7 @@ with col2:
 customers_df = load_dataset("olist_customers_dataset.csv")
 orders_df = load_dataset("olist_orders_dataset.csv")
 items_df = load_dataset("olist_order_items_dataset.csv")
-segments = get_settings("data/templates/RFM/segments.json")
+segments = get_settings("RFM/segments.json")
 
 with st.expander("Справка о RFM анализе"):
     st.markdown(read_template("RFM/about_rfm.md"))
